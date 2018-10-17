@@ -37,7 +37,6 @@ def find_words(besedilo, niz):
 
 
 
-
 ###############################################################################
 # 2) Sestavite funkcijo [find_prefix], ki vrne množico vseh besed, ki se
 #    pojavijo v nizu in imajo dano predpono.
@@ -46,12 +45,14 @@ def find_words(besedilo, niz):
 # {'zibala', 'zibel', 'zibelko'}
 ###############################################################################
 
+
 def find_prefix(besedilo, niz):
     mnozica = set()
     vzorec = r"\b" + niz + r"\w*" + r"\b"
     for ujemanje in re.findall(vzorec, besedilo):
         mnozica.add(ujemanje)
     return mnozica
+
 
 
 ###############################################################################
@@ -68,6 +69,7 @@ def find_suffix(besedilo, niz):
     for ujemanje in re.findall(vzorec, besedilo):
         mnozica.add(ujemanje)
     return mnozica
+
 
 ###############################################################################
 # 4) Sestavite funkcijo [double_letters], ki sprejme niz in vrne množico vseh
