@@ -9,28 +9,29 @@ import csv
 ###############################################################################
 
 # define the URL of the main page of the bolha cats listing
-cats_frontpage_url = 'TODO'
+cats_frontpage_url = 'http://www.bolha.com/zivali/male-zivali/macke/'
 # the directory to which we save our data
-cat_directory = 'TODO'
+cat_directory = 'cat_data'
 # the filename we use to save the frontpage
-frontpage_filename = 'TODO'
+frontpage_filename = 'frontpage.html'
 # the filename for the CSV file for the extracted data
-csv_filename = 'TODO'
+csv_filename = 'catdata.csv'
 
 
-def download_url_to_string(TODO):
+def download_url_to_string(url):
     '''This function takes a URL as argument and tries to download it
     using requests. Upon success, it returns the page contents as string.'''
     try:
         # some code here that may raise an exception
-        return TODO
+        r = requests.get(url)
         # some more code that won't be run if the exception occured
-    except 'TODO':
+    except requests.exceptions.ConnectionError:
         # some error handling / recovery code here
+        print("Could not access page" + url)
         # we may just display an informative message and quit
-        return TODO
+        return ""
     # continue with the non-exceptional code
-    return TODO
+    return r.text
 
 
 def save_string_to_file(text, directory, filename):
@@ -46,10 +47,15 @@ def save_string_to_file(text, directory, filename):
 # Define a function that downloads the frontpage and saves it to a file.
 
 
-def save_frontpage(TODO):
+def save_frontpage():
     '''Save "cats_frontpage_url" to the file
     "cat_directory"/"frontpage_filename"'''
-    return TODO
+    url = cats_frontpage_url
+    directory = cat_directory
+    filename = frontpage_filename
+    string = download_url_to_string(url)
+    save_string_to_file(string, directory, filename)
+    return None
 
 ###############################################################################
 # Now that we have some data, we can think about processing it.
@@ -58,9 +64,9 @@ def save_frontpage(TODO):
 
 def read_file_to_string(directory, filename):
     '''Return the contents of the file "directory"/"filename" as a string.'''
-    path = os.path.join(TODO)
+    path = os.path.join(directory, filename)
     with open(path, 'r') as file_in:
-        return TODO
+        return file_in.read()
 
 # Define a function that takes a webpage as a string and splits it into
 # segments such that each segment corresponds to one advertisement. This
@@ -70,9 +76,11 @@ def read_file_to_string(directory, filename):
 # functionality.
 
 
-def page_to_ads(TODO):
+def page_to_ads(url):
     '''Split "page" to a list of advertisement blocks.'''
-    return TODO
+    text = download_url_to_string(url)
+    seznam = text.split("<div class=\"ad\">")
+    return seznam
 
 # Define a function that takes a string corresponding to the block of one
 # advertisement and extracts from it the following data: Name, price, and
