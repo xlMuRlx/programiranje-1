@@ -11,7 +11,7 @@ import csv
 # define the URL of the main page of the bolha cats listing
 cats_frontpage_url = 'http://www.bolha.com/zivali/male-zivali/macke/'
 # the directory to which we save our data
-cat_directory = 'cat_data'
+cat_directory = '2-zajem-podatkov/vaje/cat_data'
 # the filename we use to save the frontpage
 frontpage_filename = 'frontpage.html'
 # the filename for the CSV file for the extracted data
@@ -79,7 +79,13 @@ def read_file_to_string(directory, filename):
 def page_to_ads(url):
     '''Split "page" to a list of advertisement blocks.'''
     text = download_url_to_string(url)
-    seznam = text.split("<div class=\"ad\">")
+    vzorec = re.compile(
+        r"<div class=\"ad\s?.*?\">(.*?)<div class=\"clear\">", 
+        re.DOTALL
+        )
+    seznam = []
+    for ujemanje in vzorec.finditer(text):
+        seznam.append(ujemanje.group(1))
     return seznam
 
 # Define a function that takes a string corresponding to the block of one
@@ -87,10 +93,17 @@ def page_to_ads(url):
 # the description as displayed on the page.
 
 
-def get_dict_from_ad_block(TODO):
+def get_dict_from_ad_block(text):
     '''Build a dictionary containing the name, description and price
     of an ad block.'''
-    return TODO
+    vzorec = re.compile(
+        r"<a title=(?P<ime>.*?) href.*?"
+        r"<div class=\"price\">(?P<cena>.*?)</div>.*?"
+        r"</h3>\s+(?P<opis>)</div>.*?",
+        re.DOTALL
+    )
+    slovar = re.match(vzorec, text)
+    return slovar.groupdict()
 
 # Write a function that reads a page from a file and returns the list of
 # dictionaries containing the information for each ad on that page.
