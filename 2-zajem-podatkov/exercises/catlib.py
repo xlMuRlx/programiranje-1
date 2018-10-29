@@ -93,7 +93,7 @@ def page_to_ads(url):
 # the description as displayed on the page.
 
 
-def get_dict_from_ad_block(text):
+def get_dict_from_ad_block(tekst):
     '''Build a dictionary containing the name, description and price
     of an ad block.'''
     vzorec = re.compile(
@@ -102,7 +102,7 @@ def get_dict_from_ad_block(text):
         r"</h3>\s+(?P<opis>)</div>.*?",
         re.DOTALL
     )
-    slovar = re.match(vzorec, text)
+    slovar = re.match(vzorec, tekst)
     return slovar.groupdict()
 
 # Write a function that reads a page from a file and returns the list of
