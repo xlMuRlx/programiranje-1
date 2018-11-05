@@ -1,6 +1,8 @@
 
 (* ========== Vaja 1: Uvod v OCaml  ========== *)
 
+(*Začasno: za zagon datoteke -> #use "4-uvod-v-ocaml/vaje/uvod.ml" *)
+
 (*----------------------------------------------------------------------------*]
  Funkcija [penultimate_element] vrne predzadnji element danega seznama. V
  primeru prekratkega seznama vrne napako.
@@ -9,7 +11,21 @@
  - : int = 3
 [*----------------------------------------------------------------------------*)
 
-let rec penultimate_element = ()
+
+let rec ultimate_element list =
+  match list with
+  | [] -> failwith "Seznam je prekratek!"
+  | x :: [] -> x
+  | _ :: ys -> ultimate_element ys
+(* To je primer funkcije, ki vrne zadnji element seznama. *)
+
+
+(* Krajši in boljši zapis funkcije (ker ne definiramo nepotrebnih argumentov). *)
+let rec penultimate_element = function
+  | [] | _ :: [] -> failwith "Seznam je prekratek!"
+  | x :: _ :: [] -> x
+  | _ :: y :: ys -> penultimate_element (y :: ys)
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [get k list] poišče [k]-ti element v seznamu [list]. Številčenje
@@ -20,7 +36,24 @@ let rec penultimate_element = ()
  - : int = 1
 [*----------------------------------------------------------------------------*)
 
-let rec get = ()
+
+(* Uporabimo match, ker uporabljamo 2 argumenta. *)
+let rec get1 k list =
+  match (k, list) with
+  | _, [] -> failwith "Seznam je prekratek!"
+  | k, x :: xs when k <= 0 -> x
+  | k, x :: xs -> get (k - 1) xs
+
+
+(* Ker se k dejansko ne uporablja v dejanski funkciji (nimamo match na njem): *)
+let rec get k = function
+  | [] -> failwith "Seznam je prekratek!"
+  | x :: xs when (k <= 0) -> x
+  | x :: xs -> get (k - 1) xs
+
+
+(* Funkcija, ki vrne prvi element. *)
+let get_first = get 1
 
 (*----------------------------------------------------------------------------*]
  Funkcija [double] podvoji pojavitve elementov v seznamu.
@@ -29,7 +62,11 @@ let rec get = ()
  - : int list = [1; 1; 2; 2; 3; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec double = ()
+
+let rec double = function
+  | [] -> []
+  | x :: xs -> x :: x :: double xs
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [divide k list] seznam razdeli na dva seznama. Prvi vsebuje prvih [k]
@@ -42,7 +79,15 @@ let rec double = ()
  - : int list * int list = ([1; 2; 3; 4; 5], [])
 [*----------------------------------------------------------------------------*)
 
-let rec divide = ()
+
+let rec divide k list =
+  match k, list with
+  | k, list when (k <= 0 ) -> ([], list)
+  | k, [] -> ([], [])
+  | k, x :: xs ->
+  let (left_list, right_list) = divide (k-1) xs in
+  (x :: left_list, right_list)
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [delete k list] iz seznama izbriše [k]-ti element. V primeru
@@ -52,8 +97,14 @@ let rec divide = ()
  - : int list = [0; 0; 0; 0; 0]
 [*----------------------------------------------------------------------------*)
 
-let rec delete = ()
 
+let rec delete k list = 
+  match k, list with
+  | k, _ when (k > lenght list) -> failwith "Seznam je prekratek!"
+  | 0, x :: xs -> xs
+  | k, x :: xs -> delete k xs
+
+  
 (*----------------------------------------------------------------------------*]
  Funkcija [slice i k list] sestavi nov seznam, ki vsebuje elemente seznama
  [list] od vključno [i]-tega do izključno [k]-tega. Predpostavimo, da sta [i] in
