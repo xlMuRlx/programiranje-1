@@ -42,7 +42,7 @@ let rec get1 k list =
   match (k, list) with
   | _, [] -> failwith "Seznam je prekratek!"
   | k, x :: xs when k <= 0 -> x
-  | k, x :: xs -> get (k - 1) xs
+  | k, x :: xs -> get1 (k - 1) xs
 
 
 (* Ker se k dejansko ne uporablja v dejanski funkciji (nimamo match na njem): *)
