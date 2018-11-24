@@ -140,8 +140,9 @@ let rec mapi f list =
 
 let rec zip list1 list2 = 
   match (list1, list2) with
-  (* Primer, če nista iste dolžine *)
   | [], [] -> []
+  | _::_, [] -> failwith "Different lengths of input lists."
+  | [], _::_ -> failwith "Different lengths of input lists."
   | x :: xs, y :: ys -> (x, y) :: zip xs ys
 
 
@@ -154,7 +155,15 @@ let rec zip list1 list2 =
  - : (int * string * int) list = [(0, "a", 7); (1, "b", 3); (2, "c", 4)]
 [*----------------------------------------------------------------------------*)
 
-let rec zip_enum_tlrec = ()
+let rec zip_enum_tlrec = 
+  let rec zip_enum_tlrec' list1 list2 k =
+    match list1 list2 with
+    | [], [] -> []
+    | _::_, [] -> failwith "Different lengths of input lists."
+    | [], _::_ -> failwith "Different lengths of input lists."
+    | x :: xs, y :: ys -> (k, x, y) :: zip_enum_tlrec' xs ys (k-1)
+  in
+  zip_enum_tlrec' list1 list2 length(list1)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [unzip] je inverz funkcije [zip], torej sprejme seznam parov

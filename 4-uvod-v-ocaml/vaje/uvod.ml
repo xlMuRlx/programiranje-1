@@ -98,11 +98,11 @@ let rec divide k list =
 [*----------------------------------------------------------------------------*)
 
 
-let rec delete k list = 
-  match k, list with
-  | k, _ when (k > lenght list) -> failwith "Seznam je prekratek!"
+let rec delete k list1 = 
+  match k, list1 with
+  | _, [] -> failwith "Seznam je prekratek!"
   | 0, x :: xs -> xs
-  | k, x :: xs -> delete k xs
+  | k, x :: xs -> x :: delete (k-1) xs
 
   
 (*----------------------------------------------------------------------------*]
@@ -114,7 +114,12 @@ let rec delete k list =
  - : int list = [1; 2; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec slice = ()
+
+let slice i k seznam =
+  let (_, slice1) = divide i seznam in
+  let (slice2, _) = divide (k - i) slice1 in
+  slice2
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [insert x k list] na [k]-to mesto seznama [list] vrine element [x].
@@ -126,7 +131,13 @@ let rec slice = ()
  - : int list = [1; 0; 0; 0; 0; 0]
 [*----------------------------------------------------------------------------*)
 
-let rec insert = ()
+
+let rec insert x k seznam = 
+  match k, seznam with
+  | _, [] -> [x]
+  | 0, sez -> x :: sez
+  | k, y :: ys -> y :: insert x (k-1) ys
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [rotate n list] seznam zavrti za [n] mest v levo. Predpostavimo, da
@@ -136,7 +147,16 @@ let rec insert = ()
  - : int list = [3; 4; 5; 1; 2]
 [*----------------------------------------------------------------------------*)
 
-let rec rotate = ()
+
+let rec rotate n seznam =
+  let rec rotate' n seznam acc =
+    match n, seznam with
+    | _, [] -> []
+    | 0, sez -> sez @ acc
+    | n, x :: xs -> rotate' (n-1) xs (acc @ [x])
+  in
+  rotate' n seznam []
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [remove x list] iz seznama izbriše vse pojavitve elementa [x].
@@ -145,7 +165,11 @@ let rec rotate = ()
  - : int list = [2; 3; 2; 3]
 [*----------------------------------------------------------------------------*)
 
-let rec remove = ()
+
+let rec remove x = function
+    | [] -> []
+    | y :: ys -> if y = x then remove x ys else y :: remove x ys
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [is_palindrome] za dani seznam ugotovi ali predstavlja palindrom.
@@ -157,7 +181,14 @@ let rec remove = ()
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
-let rec is_palindrome = ()
+
+let rec is_palindrome seznam = 
+  let rec obrni = function
+    | [] -> []
+    | x :: xs -> (obrni xs) @ [x]
+  in
+  seznam = obrni seznam
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [max_on_components] sprejme dva seznama in vrne nov seznam, katerega
@@ -168,7 +199,13 @@ let rec is_palindrome = ()
  - : int list = [5; 4; 3; 3; 4]
 [*----------------------------------------------------------------------------*)
 
-let rec max_on_components = ()
+
+let rec max_on_components seznam1 seznam2 =
+  match seznam1, seznam2 with
+    | [], _ -> []
+    | _, [] -> []
+    | x :: xs, y :: ys -> if x > y then x :: max_on_components xs ys else y :: max_on_components xs ys
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [second_largest] vrne drugo največjo vrednost v seznamu. Pri tem se
@@ -180,4 +217,12 @@ let rec max_on_components = ()
  - : int = 10
 [*----------------------------------------------------------------------------*)
 
-let rec second_largest = ()
+
+let rec second_largest seznam =
+  let rec largest = function
+    | [] -> failwith "Seznam je prekratek!"
+    | x :: [] -> x
+    | x :: xs -> max x (largest xs)
+  in
+  largest (remove (largest seznam) seznam)
+
