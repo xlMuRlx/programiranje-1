@@ -78,6 +78,7 @@ let d_to_e (Dollar v) = ...
  - : currency = Pound 0.007
 [*----------------------------------------------------------------------------*)
 
+
 type currency =
   | Yen of float
   | Pound of float
@@ -120,6 +121,7 @@ type intbool_list =
   | Bool_value of bool * intbool_list
 
 let test = Int_value (5, Bool_value(true, Bool_value(false, Int_value(7, Empty))))
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [intbool_map f_int f_bool ib_list] preslika vrednosti [ib_list] v nov
@@ -218,7 +220,7 @@ let rec intbool_separate ib_list =
 
 type magic = 
   | Fire
-  | Ice
+  | Frost
   | Arcane
 
 
@@ -269,6 +271,17 @@ let professor = {name = "Matija"; status = Employed (Fire, Teacher)}
 [*----------------------------------------------------------------------------*)
 
 
+type magic_counter = {
+  fire: int;
+  frost: int;
+  arcane: int
+}
+
+let update counter = function
+  | Fire -> {counter with fire = counter.fire + 1}
+  | Frost -> {counter with frost = counter.frost + 1}
+  | Arcane -> {counter with arcane = counter.arcane + 1}
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [count_magic] sprejme seznam čarodejev in vrne števec uporabnikov
@@ -278,7 +291,18 @@ let professor = {name = "Matija"; status = Employed (Fire, Teacher)}
  - : magic_counter = {fire = 3; frost = 0; arcane = 0}
 [*----------------------------------------------------------------------------*)
 
-let rec count_magic = ()
+
+let count_magic wizard_list =
+  let rec count acc = function
+    | [] -> acc
+    | {name; status} :: xs -> (
+        match status with
+        | Newbie -> count acc xs
+        | Student (magic, _) -> count (update acc magic) xs
+        | Employed (magic, _) -> count (update acc magic) xs)
+  in 
+  count {fire = 0; frost = 0; arcane = 0} wizard_list
+
 
 (*----------------------------------------------------------------------------*]
  Želimo poiskati primernega kandidata za delovni razpis. Študent lahko postane
@@ -294,4 +318,21 @@ let rec count_magic = ()
  - : string option = Some "Jaina"
 [*----------------------------------------------------------------------------*)
 
-let rec find_candidate = ()
+
+let rec find_candidate magic specialisation wizard_list =
+  let stevec = 
+    match specialisation with
+    | Historian -> 3
+    | Researcher -> 4
+    | Teacher -> 5
+  in
+  let rec find_candidate' = function
+    | [] -> None
+    | {name; status} :: xs -> 
+      match status with
+      | Student (magija, leta) when (magija = magic && leta >= stevec)-> Some name
+      | _ -> find_candidate' xs
+  in
+  find_candidate' wizard_list
+  
+
