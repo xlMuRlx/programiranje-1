@@ -10,7 +10,17 @@ type 'a tree =
   | Empty
   | Node of 'a tree * 'a * 'a tree
 
-  
+(*
+type 'a tree =
+  | Empty
+  | Leaf 'a
+  | Node of 'a tree * 'a * 'a tree
+*)
+
+(* Zato, da ni potrebno podajati definicij tudi za Leaf, je bolje: *)
+let leaf x = Node(Empty, x, Empty) 
+
+
 (*----------------------------------------------------------------------------*]
  Definirajmo si testni primer za preizkušanje funkcij v nadaljevanju. Testni
  primer predstavlja spodaj narisano drevo, pomagamo pa si s pomožno funkcijo
@@ -22,9 +32,11 @@ type 'a tree =
       0   6   11
 [*----------------------------------------------------------------------------*)
 
-let leaf x = Node(Empty, x, Empty) 
+let test_tree = 
+  let left_tree = Node (leaf 0, 2, Empty) in
+  let right_tree = Node (leaf 6, 7, leaf 11) in
+  Node (left_tree, 5, right_tree)
 
-let test_tree = ()
 
 (*----------------------------------------------------------------------------*]
  Funkcija [mirror] vrne prezrcaljeno drevo. Na primeru [test_tree] torej vrne
@@ -40,7 +52,10 @@ let test_tree = ()
  Node (Empty, 2, Node (Empty, 0, Empty)))
 [*----------------------------------------------------------------------------*)
 
-let rec mirror = ()
+let rec mirror = function
+  | Empty -> Empty
+  | Node (levi, x, desni) -> Node (mirror desni, x, mirror levi)
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [height] vrne višino oz. globino drevesa, funkcija [size] pa število
@@ -52,9 +67,32 @@ let rec mirror = ()
  - : int = 6
 [*----------------------------------------------------------------------------*)
 
-let rec height = ()
+let rec height = function
+  | Empty -> 0
+  | Node (levi, x, desni) -> 1 + max (height levi) (height desni)
 
-let rec size = ()
+let rec size = function
+  | Empty -> 0
+  | Node (levi, x, desni) -> 1 + size levi + size desni
+
+
+(* Repno rekurzivna funkcija size -> poglej pred izpitom. *)
+let tl_rec_size tree =
+  let rec size' acc queue = 
+    (* V queue zapisujemo še nepregledana drevesa. *)
+    (* Pogledamo, kateri je naslednji element v vrsti za obravnavo. *)
+    match queue with
+    | [] -> acc
+    | t :: ts -> (
+      (* Obravnavamo drevo. *)
+      match t with
+      | Empty -> size' acc ts (* Prazno drevo samo odstranimo iz vrste. *)
+      (* Akumulator povečamo za 1 ter poddrevesa dodamo v vrsto. *)
+      | Node (levi, x, desni) -> size' (acc + 1) (levi :: desni :: ts)
+    )
+  in
+  size' 0 [tree]
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [follow directions tree] tipa [direction list -> 'a tree -> 'a option]
@@ -70,7 +108,16 @@ let rec size = ()
 
 type direction = Left | Right
 
-let rec follow = ()
+let rec follow seznam tree =
+  match seznam, tree with
+  | [], Node (levi, x, desni) -> Some x
+  | _, Empty -> None
+  | t :: ts, Node (levi, x, desni) -> (
+    match t with
+    | Right -> follow ts desni
+    | Left -> follow ts levi
+  )
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [prune directions tree] poišče vozlišče v drevesu [t] glede na 
@@ -85,7 +132,11 @@ let rec follow = ()
  Some (Node (Node (Node (Empty, 0, Empty), 2, Empty), 5, Empty))
 [*----------------------------------------------------------------------------*)
 
-let rec prune = ()
+let rec prune seznam tree =
+  match seznam, tree with 
+  | [] -> Empty
+  | _, Empty -> Empty
+  
 
 (*----------------------------------------------------------------------------*]
  Funkcija [map_tree f tree] preslika drevo [tree] v novo drevo, ki vsebuje
