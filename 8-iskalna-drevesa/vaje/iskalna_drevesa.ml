@@ -134,9 +134,22 @@ let rec follow seznam tree =
 
 let rec prune seznam tree =
   match seznam, tree with 
-  | [] -> Empty
-  | _, Empty -> Empty
-  
+  | [], Node (levi, x, desni) -> Some (Node (levi, x, desni))
+  | _, Empty -> None
+  | t :: ts, Node (levi, x, desni) -> (
+    match t with
+    | Right -> (
+      match prune ts desni with
+      | None -> Some (Node (levi, x, desni))
+      | Some _ -> Some (Node (levi, x, Empty))
+    )
+    | Left -> (
+      match prune ts levi with
+      | None -> Some (Node (levi, x, desni))
+      | Some _ -> Some (Node (Empty, x, desni))
+    )
+  )
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [map_tree f tree] preslika drevo v novo drevo, ki vsebuje podatke
@@ -148,6 +161,10 @@ let rec prune seznam tree =
  Node (Node (Empty, true, Empty), true, Node (Empty, true, Empty)))
 [*----------------------------------------------------------------------------*)
 
+let rec map_tree f = function
+  | Empty -> Empty
+  | Node (levi, x, desni) -> Node (map_tree f levi, f x, map_tree f desni)
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [list_of_tree] pretvori drevo v seznam. Vrstni red podatkov v seznamu
@@ -157,6 +174,10 @@ let rec prune seznam tree =
  - : int list = [0; 2; 5; 6; 7; 11]
 [*----------------------------------------------------------------------------*)
 
+let rec list_of_tree = function
+  | Empty -> []
+  | Node (levi, x, desni) -> (list_of_tree levi) @ [x] @ (list_of_tree desni)
+  
 
 (*----------------------------------------------------------------------------*]
  Funkcija [is_bst] preveri ali je drevo binarno iskalno drevo (Binary Search 
@@ -168,6 +189,13 @@ let rec prune seznam tree =
  # test_tree |> mirror |> is_bst;;
  - : bool = false
 [*----------------------------------------------------------------------------*)
+
+let rec is_bst tree =
+  let rec urejeno = function
+    | [] | _ :: [] -> true
+    | x :: y :: xs -> if x < y then urejeno (y :: xs) else false
+  in
+  urejeno (list_of_tree tree)
 
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
@@ -184,6 +212,13 @@ let rec prune seznam tree =
  - : bool = false
 [*----------------------------------------------------------------------------*)
 
+
+let rec member k tree =
+  let rec vsebuje m = function
+    | [] -> false
+    | x :: xs -> if x = m then true else vsebuje m xs
+  in
+  vsebuje k (list_of_tree tree)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [member2] ne privzame, da je drevo bst.
