@@ -97,6 +97,7 @@ module Nat_peano : NAT = struct
 
 end
 
+(* Ni nujno *)
 (*----------------------------------------------------------------------------*]
  V OCamlu lahko module podajamo kot argumente funkcij, z uporabo besede
  [module]. Funkcijo, ki sprejme modul torej definiramo kot

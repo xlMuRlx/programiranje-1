@@ -9,6 +9,15 @@
  val l : int list = [0; 1; 0; 4; 0; 9; 1; 2; 5; 4]
 [*----------------------------------------------------------------------------*)
 
+let rec randlist len max =
+  let rec randlist' max acc = function
+    | 0 -> acc
+    | k -> randlist' max ((Random.int max) :: acc) (k - 1)
+  in
+  randlist' max [] len
+
+let l = randlist 10 10 ;;
+
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Sedaj lahko s pomočjo [randlist] primerjamo našo urejevalno funkcijo (imenovana
@@ -17,6 +26,10 @@
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  let test = (randlist 100 100) in (our_sort test = List.sort compare test);;
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
+
+let test_sort_fun our_sort =
+  let test = (randlist 100 100) in 
+  (our_sort test = List.sort compare test)
 
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
@@ -35,12 +48,22 @@
  - : int list = [7]
 [*----------------------------------------------------------------------------*)
 
+let rec insert y = function
+  | [] -> [y]
+  | x :: xs -> if y <= x then y :: x :: xs else x :: (insert y xs)
+
 
 (*----------------------------------------------------------------------------*]
  Prazen seznam je že urejen. Funkcija [insert_sort] uredi seznam tako da
  zaporedoma vstavlja vse elemente seznama v prazen seznam.
 [*----------------------------------------------------------------------------*)
 
+let rec insert_sort seznam =
+  let rec insert_sort' acc = function
+    | [] -> acc
+    | x :: xs -> insert_sort' (insert x acc) xs
+  in
+  insert_sort' [] seznam
 
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
@@ -52,6 +75,30 @@
  najmanjši element v [list] in seznam [list'] enak [list] z odstranjeno prvo
  pojavitvijo elementa [z]. V primeru praznega seznama vrne [None]. 
 [*----------------------------------------------------------------------------*)
+
+let rec prvi_element = function
+  | [] -> failwith "Seznam je prekratek!"
+  | x :: xs -> x
+
+let rec min_seznam seznam = 
+  let rec min_seznam' k = function
+    | [] -> k
+    | x :: xs -> if x <= k then min_seznam' x xs else min_seznam' k xs
+  in
+  min_seznam' (prvi_element seznam) seznam
+
+
+let rec min_and_rest seznam =
+  if seznam = [] then None
+  else
+    let k = min_seznam seznam
+    in
+    let rec rest k seznam =
+      match seznam with
+      | [] -> []
+      | x :: xs -> if x = k then xs else  x :: (rest k xs)
+    in
+    Some (k, rest k seznam)
 
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
@@ -67,11 +114,28 @@
  (Hitreje je obrniti vrstni red seznama kot na vsakem koraku uporabiti [@].)
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+let rec obrni sez =
+  let rec reverse' acc = function
+    | [] -> acc
+    | glava :: rep -> reverse' (glava :: acc) rep
+    in
+    reverse' [] sez
+
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort] je implementacija zgoraj opisanega algoritma.
  Namig: Uporabi [min_and_rest] iz prejšnje naloge.
 [*----------------------------------------------------------------------------*)
 
+let rec selection_sort seznam =
+  let rec sort' acc = function
+    | [] -> obrni acc
+    | sez -> (
+      match min_and_rest sez with
+      | None -> failwith "Se ne zgodi!"
+      | Some (x, xs) -> sort' (x :: acc) xs
+    )
+  in
+  sort' [] seznam
 
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]

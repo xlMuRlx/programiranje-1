@@ -220,12 +220,28 @@ let rec member k tree =
   in
   vsebuje k (list_of_tree tree)
 
+let rec insert x = function
+  | Empty -> leaf x
+  | Node (levi, y, desni) -> 
+      if y >= x then 
+        Node (insert x levi, y, desni) 
+      else 
+        Node (levi, y, insert x desni)
+
+
 (*----------------------------------------------------------------------------*]
  Funkcija [member2] ne privzame, da je drevo bst.
  
  Opomba: Premislte kolikšna je časovna zahtevnost funkcije [member] in kolikšna
  funkcije [member2] na drevesu z n vozlišči, ki ima globino log(n). 
 [*----------------------------------------------------------------------------*)
+
+let rec member2 k tree =
+  let rec vsebuje m = function
+    | [] -> false
+    | x :: xs -> if x = m then true else vsebuje m xs
+  in
+  vsebuje k (list_of_tree tree)
 
 
 (*----------------------------------------------------------------------------*]
@@ -241,6 +257,24 @@ let rec member k tree =
  - : int option = None
 [*----------------------------------------------------------------------------*)
 
+let rec succ = function
+  | Empty -> None
+  | Node (_, _, desni) -> (
+    match list_of_tree desni with 
+    | [] -> None
+    | x :: xs -> Some x
+  )
+
+
+let rec tree_max = function
+  | Empty -> None
+  | Node (_, x, Empty) -> Some x
+  | Node (_, _, desni) -> tree_max desni
+
+let rec pred = function
+  | Empty -> None
+  | Node (levi, _, _) -> tree_max levi
+
 
 (*----------------------------------------------------------------------------*]
  Na predavanjih ste omenili dva načina brisanja elementov iz drevesa. Prvi 
@@ -255,6 +289,31 @@ let rec member k tree =
  Node (Node (Empty, 6, Empty), 11, Empty))
 [*----------------------------------------------------------------------------*)
 
+let rec tree_min = function
+  | Empty -> None
+  | Node (Empty, x, _) -> Some x
+  | Node (levi, _, _) -> tree_min levi
+
+let succ2 = function
+  | Empty -> None
+  | Node(_, _, desni) -> tree_min desni
+
+let rec delete x tree =
+  match tree with
+  | Empty -> (* Empty case *) Empty
+  | Node (Empty, y, Empty) when x = y -> (* Leaf case *) Empty
+  | Node (Empty, y, desni) when x = y -> (* One sided *) desni
+  | Node (levi, y, Empty) when x = y -> (*One sided *) levi
+  | Node (levi, y, desni) when x <> y -> (* Recurse deeper *)
+      if x > y then
+        Node (levi, y, delete x desni)
+      else
+        Node (delete x levi, y, desni)
+  | Node (levi, y, desni) -> (* SUPER FUN CASE :D *)
+      match succ2 tree with 
+      | None -> failwith "How is this possible?!" (* This cannot happen :D *)
+      | Some z -> Node (levi, z, delete z desni)
+
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  SLOVARJI
@@ -267,6 +326,7 @@ let rec member k tree =
  vrednosti, ga parametriziramo kot [('key, 'value) dict].
 [*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*)
 
+type ('key, 'value) dict = ('key * 'value) tree
 
 (*----------------------------------------------------------------------------*]
  Napišite testni primer [test_dict]:
@@ -277,6 +337,10 @@ let rec member k tree =
      "c":-2
 [*----------------------------------------------------------------------------*)
 
+let test_dict =
+  let desni = Node(leaf ("c", -2), ("d", 2), Empty)
+  in
+  Node(leaf ("a", 0), ("b", 1), desni)
 
 (*----------------------------------------------------------------------------*]
  Funkcija [dict_get key dict] v slovarju poišče vrednost z ključem [key]. Ker
@@ -288,7 +352,15 @@ let rec member k tree =
  - : int option = Some (-2)
 [*----------------------------------------------------------------------------*)
 
+let rec dict_get key = function
+  | Empty -> None
+  | Node (levi, (x, y), desni) -> 
+      if x = key then Some y
+      else
+        if x > key then dict_get key levi
+        else dict_get key desni
       
+  
 (*----------------------------------------------------------------------------*]
  Funkcija [print_dict] sprejme slovar s ključi tipa [string] in vrednostmi tipa
  [int] in v pravilnem vrstnem redu izpiše vrstice "ključ : vrednost" za vsa
@@ -304,6 +376,17 @@ let rec member k tree =
  d : 2
  - : unit = ()
 [*----------------------------------------------------------------------------*)
+
+let rec print_element = function
+  | (* prazen *) -> ??
+  | (x, y) -> 
+
+let rec print_dict dict =
+  let seznam = list_of_tree dict
+  in
+  match seznam with
+  | [] -> print_element (* prazen *)
+  | x :: xs -> print_element x 
 
 
 (*----------------------------------------------------------------------------*]
