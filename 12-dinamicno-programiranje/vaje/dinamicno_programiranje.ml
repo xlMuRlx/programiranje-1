@@ -93,7 +93,6 @@ jih zato ni potrebno računati večkrat. *)
 [*----------------------------------------------------------------------------*)
 
 
-
 (*----------------------------------------------------------------------------*]
  Na nagradni igri ste zadeli kupon, ki vam omogoča, da v Mercatorju kupite
  poljubne izdelke, katerih skupna masa ne presega [max_w] kilogramov. Napišite
