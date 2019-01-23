@@ -92,6 +92,20 @@ jih zato ni potrebno računati večkrat. *)
  - : int = 35
 [*----------------------------------------------------------------------------*)
 
+let rec rdeci = function
+  | 0 -> 1
+  | n when n < 0 -> 0
+  | n -> modri (n - 1) +  modri (n - 2)
+
+and modri = function
+  | 0 -> 1
+  | n when n < 0 -> 0
+  | n -> rdeci (n - 2) + rdeci (n - 3)
+
+
+let alternating_towers = function
+  | 0 -> 1
+  | n -> rdeci n + modri n
 
 (*----------------------------------------------------------------------------*]
  Na nagradni igri ste zadeli kupon, ki vam omogoča, da v Mercatorju kupite
@@ -122,3 +136,16 @@ let articles = [|
   ("Nutella", 4.99, 0.75);
   ("juice", 1.15, 2.0)
 |]
+
+
+let best_value articles max_w =
+  let rec get_item acc_w acc_p (_, p, w) =
+    if acc_w +. w > max_w then
+      acc_p
+    else
+      shopper (acc_w +. w) (acc_p +. p)
+  and shopper w p =
+    let choices = Array.map (get_item w p) articles in
+    Array.fold_left max 0. choices
+  in
+  shopper 0. 0.

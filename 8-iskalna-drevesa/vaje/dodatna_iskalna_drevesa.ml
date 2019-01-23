@@ -9,6 +9,22 @@
  - : bool = true
 [*----------------------------------------------------------------------------*)
 
+let rec insert x = function
+  | Empty -> leaf x
+  | Node(levi, y, desni) ->
+    if x < y then
+      Node(insert x levi, y, desni)
+    else
+      Node(levi, y, insert x desni)
+
+
+let rec bst_of_list seznam =
+  let rec bst' tree = function
+    | [] -> tree
+    | x :: xs -> bst' (insert x tree) xs
+  in
+  bst' Empty seznam
+
 
 (*----------------------------------------------------------------------------*]
  Funkcija [tree_sort] uredi seznam s pomočjo pretvorbe v bst in nato nazaj
